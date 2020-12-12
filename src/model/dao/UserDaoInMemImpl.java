@@ -13,6 +13,7 @@ public class UserDaoInMemImpl implements UserDao{
     public UserDaoInMemImpl() {
         users.add(new User("admin", "***"));
         users.add(new User("guest", "123"));
+        users.add(new User("userTest", "123"));
     }
 
     @Override
@@ -35,12 +36,13 @@ public class UserDaoInMemImpl implements UserDao{
 
     @Override
     public void update(User user, String[]params) {
+        int userIndex = users.indexOf(user);
         user.setUserName(Objects.requireNonNull(
                 params[0], "Name cannot be null"));
         user.setPassword(Objects.requireNonNull(
-                params[1], "Email cannot be null"));
+                params[1], "Password cannot be null"));
 
-        users.add(user);
+        users.set(userIndex,user);
     }
 
     @Override

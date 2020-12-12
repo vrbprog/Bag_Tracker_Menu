@@ -46,12 +46,15 @@ public class Controller {
 
     public void run(){
 
-        while (!getChoiceUserLoginMenu()){
-            System.out.println("********************");
-            System.out.println("Incorrect data entry. Repeat again ");
-        }
+        boolean exitFlagTopMenu;
+        do {
+            while (!getChoiceUserLoginMenu()) {
+                System.out.println("********************");
+                System.out.println("Incorrect data entry. Repeat again ");
+            }
 
-        userTopMenu.show();
+            exitFlagTopMenu = getChoiceUserTopMenu();
+        }while (exitFlagTopMenu);
 
         //
         //
@@ -64,17 +67,45 @@ public class Controller {
     private boolean getChoiceUserLoginMenu(){
         switch (loginMenu.show()){
             case 1:{
-                System.out.println("Login.... ");
+                System.out.println("Login ....");
                 return loginSubMenu(scanner);
             }
             case 2:{
-                System.out.println("Registration.... ");
+                System.out.println("Registration .... ");
                 return registerSubMenu(scanner);
             }
             case 0:{
                 System.exit(0);
             }
             default: {
+                return false;
+            }
+        }
+    }
+
+    private boolean getChoiceUserTopMenu() {
+        switch (userTopMenu.show()) {
+            case 1: {
+                System.out.println("Creating ticket ....");
+                return false;
+            }
+            case 2: {
+                System.out.println("Editing ticket .... ");
+                return false;
+            }
+            case 3: {
+                System.out.println("My tickets list ....");
+                return false;
+            }
+            case 4: {
+                System.out.println("Dashboard .... ");
+                return false;
+            }
+            case 0: {
+                return true;
+            }
+            default: {
+                System.out.println("Incorrect input data");
                 return false;
             }
         }
