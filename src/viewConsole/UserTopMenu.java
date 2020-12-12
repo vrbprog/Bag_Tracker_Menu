@@ -14,7 +14,7 @@ public class UserTopMenu extends BaseMenu{
         System.out.println("User top menu");
         showItems(menu);
         System.out.println("--------------------");
-        System.out.println("0. Exit from program");
+        System.out.println("0. Exit to login menu");
         System.out.println("********************");
         System.out.print("Make your choice: ");
         String choice =  scanner.nextLine();

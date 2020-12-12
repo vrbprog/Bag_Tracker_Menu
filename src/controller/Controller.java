@@ -125,12 +125,10 @@ public class Controller {
         String password = scanner.nextLine();
 
         if (loginService.login(login, password)) {
-            System.out.println("######################");
-            System.out.println("Hello. You are login in system");
+            printMessageMenu("Hello. You are login in system");
             return true;
         } else {
-            System.out.println("--------------------");
-            System.out.println("Wrong username/password");
+            printMessageMenu("Wrong username/password");
             return false;
         }
     }
@@ -144,8 +142,7 @@ public class Controller {
         login = scanner.nextLine();
 
         if (loginService.loginIsBusy(login)) {
-            System.out.println("--------------------");
-            System.out.println("This login is busy");
+            printMessageMenu("This login is busy");
             return false;
         }
         System.out.print("Enter password: ");
@@ -155,13 +152,16 @@ public class Controller {
         passwordConfirm = scanner.nextLine();
 
         if (!password.equals(passwordConfirm)) {
-            System.out.println("--------------------");
-            System.out.println("Password confirmation failed");
+            printMessageMenu("Password confirmation failed");
             return false;
         }
         userDao.saveUser(new User(login,password));
-        System.out.println("--------------------");
-        System.out.println("Hello. You are registered in system");
+        printMessageMenu("Hello. You are registered in system");
         return true;
+    }
+
+    private void printMessageMenu(String mes){
+        System.out.println("--------------------");
+        System.out.println(mes);
     }
 }
