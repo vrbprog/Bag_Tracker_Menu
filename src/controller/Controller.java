@@ -1,6 +1,6 @@
 package controller;
 
-import model.dao.MemoryUserDao;
+import model.dao.UserDaoInMemImpl;
 import service.LoginUserService;
 import service.UserService;
 import viewConsole.LoginMenu;
@@ -18,7 +18,7 @@ public class Controller {
 
     private LoginMenu loginMenu;
     private UserTopMenu userTopMenu;
-    private UserDao<User> userDao;
+    private UserDao userDao;
     private Scanner scanner;
     private UserService loginService;
 
@@ -40,7 +40,7 @@ public class Controller {
         userTopMenu = new UserTopMenu(listUserTopMenuItem);
 
         scanner = new Scanner(System.in);
-        UserDao<User> userDao = new MemoryUserDao();
+        UserDao userDao = new UserDaoInMemImpl();
         loginService = new LoginUserService(userDao);
     }
 
@@ -51,8 +51,6 @@ public class Controller {
             System.out.println("Incorrect data entry. Repeat again ");
         }
 
-
-        System.out.println("Ok!!");
         userTopMenu.show();
 
         //
@@ -91,7 +89,7 @@ public class Controller {
         String password =  scanner.nextLine();
 
         if(loginService.login(login, password)) {
-            System.out.println("\n\r#########################");
+            System.out.println("######################");
             System.out.println("Hello. You are login in system");
             return true;
         }

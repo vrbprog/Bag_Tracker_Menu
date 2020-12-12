@@ -7,17 +7,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MemoryUserDao implements UserDao<User>{
+public class UserDaoInMemImpl implements UserDao{
     private final List<User> users = new ArrayList<>();
 
-    public MemoryUserDao() {
+    public UserDaoInMemImpl() {
         users.add(new User("admin", "***"));
         users.add(new User("guest", "123"));
     }
 
     @Override
-    public Optional<User> get(long id) {
-        return Optional.ofNullable(users.get((int) id));
+    public User getUserByName(String userName) {
+        Optional<User> optionalUser = users.stream()
+                .filter(user -> user.getUserName()
+                        .equals(userName)).findFirst();
+        return optionalUser.orElseGet(User::new);
     }
 
     @Override
@@ -26,13 +29,13 @@ public class MemoryUserDao implements UserDao<User>{
     }
 
     @Override
-    public void save(User user) {
+    public void saveUser(User user) {
         users.add(user);
     }
 
     @Override
     public void update(User user, String[]params) {
-        user.setLogin(Objects.requireNonNull(
+        user.setUserName(Objects.requireNonNull(
                 params[0], "Name cannot be null"));
         user.setPassword(Objects.requireNonNull(
                 params[1], "Email cannot be null"));
@@ -41,7 +44,7 @@ public class MemoryUserDao implements UserDao<User>{
     }
 
     @Override
-    public void delete(User user) {
+    public void deleteUser(User user) {
         users.remove(user);
     }
 }

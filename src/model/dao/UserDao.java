@@ -1,17 +1,19 @@
 package model.dao;
 
+import model.User;
+
 import java.util.List;
 import java.util.Optional;
 
-public interface UserDao<T> {
+public interface UserDao {
 
-    void save(T t);
+    void saveUser(User user);
 
-    void delete(T t);
+    void deleteUser(User user);
 
-    List<T> getAll();
+    List<User> getAll();
 
-    Optional<T> get(long id);
+    User getUserByName(String userName);
 
-    void update(T t, String[]params);
+    void update(User user, String[]params);
 }
