@@ -3,9 +3,7 @@ package viewConsole;
 import java.util.List;
 
 public interface Menu {
-    int show();
-
-    //void exit();
+    int show(String header, String exit);
 
     default void showItems(List<MenuItem> items) {
         int i = 1;

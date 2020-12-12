@@ -5,20 +5,16 @@ import model.dao.UserDaoInFileImpl;
 import model.dao.UserDaoInMemImpl;
 import service.LoginUserService;
 import service.UserService;
-import viewConsole.LoginMenu;
-import viewConsole.MenuItem;
-import viewConsole.UserTopMenu;
+import viewConsole.*;
 import model.dao.UserDao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Controller {
 
-    private LoginMenu loginMenu;
-    private UserTopMenu userTopMenu;
+    private BaseMenu loginMenu;
+    private BaseMenu userTopMenu;
     private UserDao userDao;
     private Scanner scanner;
     private UserService loginService;
@@ -28,17 +24,17 @@ public class Controller {
     }
 
     private void init() {
-        List<MenuItem> listLoginMenuItem = new ArrayList<>(Arrays.asList(
-                new MenuItem("Login"),
-                new MenuItem("Registration")));
-        loginMenu = new LoginMenu(listLoginMenuItem);
+        List<MenuItem> listLoginMenuItem = Arrays
+                .stream(LoginMenuItem.values()).map(loginItem ->
+                        new MenuItem(loginItem.toString()))
+                .collect(Collectors.toList());
+        loginMenu = new BaseMenu(listLoginMenuItem);
 
-        List<MenuItem> listUserTopMenuItem = new ArrayList<>(Arrays.asList(
-                new MenuItem("Create ticket"),
-                new MenuItem("Edit ticket"),
-                new MenuItem("My tickets list"),
-                new MenuItem("My dashboard")));
-        userTopMenu = new UserTopMenu(listUserTopMenuItem);
+        List<MenuItem> listUserTopMenuItem = Arrays
+                .stream(UserTopMenuItem.values()).map(loginItem ->
+                        new MenuItem(loginItem.toString()))
+                .collect(Collectors.toList());
+        userTopMenu = new BaseMenu(listUserTopMenuItem);
 
         scanner = new Scanner(System.in);
         //userDao = new UserDaoInMemImpl();
@@ -79,7 +75,9 @@ public class Controller {
     }
 
     private boolean getChoiceUserLoginMenu() {
-        switch (loginMenu.show()) {
+        String headerLoginMenu = "Login menu";
+        String exitLoginMenu = "0. Exit from program";
+        switch (loginMenu.show(headerLoginMenu, exitLoginMenu)) {
             case 1: {
                 System.out.println("Login ....");
                 return loginSubMenu(scanner);
@@ -98,7 +96,9 @@ public class Controller {
     }
 
     private boolean getChoiceUserTopMenu() {
-        switch (userTopMenu.show()) {
+        String headerUserTopMenu = "User top menu";
+        String exitUserTopMenu = "0. Exit to login menu";
+        switch (userTopMenu.show(headerUserTopMenu, exitUserTopMenu)) {
             case 1: {
                 System.out.println("Creating ticket ....");
                 return false;
@@ -163,12 +163,12 @@ public class Controller {
             printMessageMenu("Password confirmation failed");
             return false;
         }
-        userDao.saveUser(new User(login,password));
+        userDao.saveUser(new User(login, password));
         printMessageMenu("Hello. You are registered in system");
         return true;
     }
 
-    private void printMessageMenu(String mes){
+    private void printMessageMenu(String mes) {
         System.out.println("--------------------");
         System.out.println(mes);
     }
