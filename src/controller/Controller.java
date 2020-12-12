@@ -53,16 +53,13 @@ public class Controller {
 
             exitFlagTopMenu = getChoiceUserTopMenu();
 
-//            String[] params = {"userTest", "12345"};
+//            String[] params = {"userTest", "88888"};
 //            userDao.updateUser(userDao
 //                    .getAll()
-//                    .get(2), params);
-
+//                    .get(1), params);
 //            userDao.deleteUser(userDao
 //                    .getAll()
-//                    .get(2));
-
-            //userDao.deleteUser(new User("Alex","45"));
+//                    .get(3));
 
         } while (exitFlagTopMenu);
 

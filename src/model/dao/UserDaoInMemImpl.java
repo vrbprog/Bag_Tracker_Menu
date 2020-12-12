@@ -41,7 +41,6 @@ public class UserDaoInMemImpl implements UserDao{
                 params[0], "Name cannot be null"));
         user.setPassword(Objects.requireNonNull(
                 params[1], "Password cannot be null"));
-
         users.set(userIndex,user);
     }
 

@@ -1,6 +1,4 @@
 admin:admin
-guest:12345
+userTest:88888
 roman:vrb
-Alex:alex
-Boss:777
 Jon:111

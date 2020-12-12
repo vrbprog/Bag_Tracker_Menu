@@ -3,10 +3,7 @@ package model.dao;
 import model.User;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class UserDaoInFileImpl implements UserDao {
     private final List<User> users = new ArrayList<>();
@@ -28,7 +25,7 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public void deleteUser(User user) {
-        deleteUserFromFile(user);
+        updateUserFromFile(user,"");
         users.remove(user);
     }
 
@@ -47,7 +44,17 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public void updateUser(User user, String[] params) {
+        int userIndex = users.indexOf(user);
+        users.set(userIndex,user);
 
+        User newUser = new User();
+        newUser.setUserName(Objects.requireNonNull(
+                params[0], "Name cannot be null"));
+        newUser.setPassword(Objects.requireNonNull(
+                params[1], "Password cannot be null"));
+        String stringNewUser = newUser.getUserName() + regex +
+                newUser.getPassword() + System.lineSeparator();
+        updateUserFromFile(user,stringNewUser);
     }
 
     private void addUserFromLine(String line) {
@@ -79,7 +86,7 @@ public class UserDaoInFileImpl implements UserDao {
         }
     }
 
-    private void deleteUserFromFile(User user) {
+    private void updateUserFromFile(User user, String update) {
         Scanner sc = null;
         try {
             sc = new Scanner(new File(nameFile));
@@ -95,7 +102,7 @@ public class UserDaoInFileImpl implements UserDao {
             fileContents = buffer.toString();
             sc.close();
             fileContents = fileContents.replaceAll(user.getUserName() + regex +
-                    user.getPassword() + System.lineSeparator(), "");
+                    user.getPassword() + System.lineSeparator(), update);
             FileWriter writer;
             try {
                 writer = new FileWriter(nameFile);
