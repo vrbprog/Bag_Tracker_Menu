@@ -1,5 +1,6 @@
 package controller;
 
+import model.User;
 import model.dao.UserDaoInMemImpl;
 import service.LoginUserService;
 import service.UserService;
@@ -7,7 +8,6 @@ import viewConsole.LoginMenu;
 import viewConsole.MenuItem;
 import viewConsole.UserTopMenu;
 import model.dao.UserDao;
-import model.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class Controller {
         init();
     }
 
-    private void init(){
+    private void init() {
         List<MenuItem> listLoginMenuItem = new ArrayList<>(Arrays.asList(
                 new MenuItem("Login"),
                 new MenuItem("Registration")));
@@ -40,11 +40,11 @@ public class Controller {
         userTopMenu = new UserTopMenu(listUserTopMenuItem);
 
         scanner = new Scanner(System.in);
-        UserDao userDao = new UserDaoInMemImpl();
+        userDao = new UserDaoInMemImpl();
         loginService = new LoginUserService(userDao);
     }
 
-    public void run(){
+    public void run() {
 
         boolean exitFlagTopMenu;
         do {
@@ -54,7 +54,13 @@ public class Controller {
             }
 
             exitFlagTopMenu = getChoiceUserTopMenu();
-        }while (exitFlagTopMenu);
+
+//            String[] params = {"userTest", "12345"};
+//            userDao.updateUser(userDao
+//                    .getAll()
+//                    .get(2), params);
+
+        } while (exitFlagTopMenu);
 
         //
         //
@@ -64,17 +70,17 @@ public class Controller {
         System.exit(0);
     }
 
-    private boolean getChoiceUserLoginMenu(){
-        switch (loginMenu.show()){
-            case 1:{
+    private boolean getChoiceUserLoginMenu() {
+        switch (loginMenu.show()) {
+            case 1: {
                 System.out.println("Login ....");
                 return loginSubMenu(scanner);
             }
-            case 2:{
+            case 2: {
                 System.out.println("Registration .... ");
                 return registerSubMenu(scanner);
             }
-            case 0:{
+            case 0: {
                 System.exit(0);
             }
             default: {
@@ -111,28 +117,25 @@ public class Controller {
         }
     }
 
-    private boolean loginSubMenu(Scanner scanner)
-    {
+    private boolean loginSubMenu(Scanner scanner) {
         System.out.print("Input login: ");
-        String login =  scanner.nextLine();
+        String login = scanner.nextLine();
 
         System.out.print("Input password: ");
-        String password =  scanner.nextLine();
+        String password = scanner.nextLine();
 
-        if(loginService.login(login, password)) {
+        if (loginService.login(login, password)) {
             System.out.println("######################");
             System.out.println("Hello. You are login in system");
             return true;
-        }
-        else {
+        } else {
             System.out.println("--------------------");
             System.out.println("Wrong username/password");
             return false;
         }
     }
 
-    private boolean registerSubMenu(Scanner scanner)
-    {
+    private boolean registerSubMenu(Scanner scanner) {
         String login;
         String password;
         String passwordConfirm;
@@ -140,22 +143,23 @@ public class Controller {
         System.out.print("Enter login: ");
         login = scanner.nextLine();
 
-        if(loginService.loginIsBusy(login)) {
+        if (loginService.loginIsBusy(login)) {
             System.out.println("--------------------");
             System.out.println("This login is busy");
             return false;
         }
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
+        System.out.print("Enter password: ");
+        password = scanner.nextLine();
 
-            System.out.print("Confirm password: ");
-            passwordConfirm = scanner.nextLine();
+        System.out.print("Confirm password: ");
+        passwordConfirm = scanner.nextLine();
 
-            if(!password.equals(passwordConfirm)) {
-                System.out.println("--------------------");
-                System.out.println("Password confirmation failed");
-                return false;
-            }
+        if (!password.equals(passwordConfirm)) {
+            System.out.println("--------------------");
+            System.out.println("Password confirmation failed");
+            return false;
+        }
+        userDao.saveUser(new User(login,password));
         System.out.println("--------------------");
         System.out.println("Hello. You are registered in system");
         return true;

@@ -35,7 +35,7 @@ public class UserDaoInMemImpl implements UserDao{
     }
 
     @Override
-    public void update(User user, String[]params) {
+    public void updateUser(User user, String[]params) {
         int userIndex = users.indexOf(user);
         user.setUserName(Objects.requireNonNull(
                 params[0], "Name cannot be null"));
