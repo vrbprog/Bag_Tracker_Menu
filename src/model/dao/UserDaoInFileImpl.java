@@ -44,9 +44,6 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public void updateUser(User user, String[] params) {
-        int userIndex = users.indexOf(user);
-        users.set(userIndex,user);
-
         User newUser = new User();
         newUser.setUserName(Objects.requireNonNull(
                 params[0], "Name cannot be null"));
@@ -55,6 +52,7 @@ public class UserDaoInFileImpl implements UserDao {
         String stringNewUser = newUser.getUserName() + regex +
                 newUser.getPassword() + System.lineSeparator();
         updateUserFromFile(user,stringNewUser);
+        users.set(users.indexOf(user),newUser);
     }
 
     private void addUserFromLine(String line) {
