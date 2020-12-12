@@ -1,6 +1,7 @@
 package controller;
 
 import model.User;
+import model.dao.UserDaoInFileImpl;
 import model.dao.UserDaoInMemImpl;
 import service.LoginUserService;
 import service.UserService;
@@ -40,7 +41,8 @@ public class Controller {
         userTopMenu = new UserTopMenu(listUserTopMenuItem);
 
         scanner = new Scanner(System.in);
-        userDao = new UserDaoInMemImpl();
+        //userDao = new UserDaoInMemImpl();
+        userDao = new UserDaoInFileImpl();
         loginService = new LoginUserService(userDao);
     }
 
@@ -59,6 +61,12 @@ public class Controller {
 //            userDao.updateUser(userDao
 //                    .getAll()
 //                    .get(2), params);
+
+//            userDao.deleteUser(userDao
+//                    .getAll()
+//                    .get(2));
+
+            //userDao.deleteUser(new User("Alex","45"));
 
         } while (exitFlagTopMenu);
 
