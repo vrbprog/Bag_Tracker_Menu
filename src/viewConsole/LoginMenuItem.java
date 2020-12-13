@@ -1,6 +1,6 @@
 package viewConsole;
 
 public enum LoginMenuItem {
-    Login,
-    Registration
+    LOGIN,
+    REGISTRATION
 }

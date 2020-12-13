@@ -20,12 +20,12 @@ public class BaseMenu implements Menu {
         return getUserChoice();
     }
 
-    public void showHeaderMenu(){
+    private void showHeaderMenu(){
         System.out.println("********************");
         System.out.println(menu.get(0).getNameItem());
     }
 
-    public void showBottomMenu(){
+    private void showBottomMenu(){
         System.out.println("--------------------");
         System.out.println(menu.get(menu.size()-1).getNameItem());
         System.out.println("********************");

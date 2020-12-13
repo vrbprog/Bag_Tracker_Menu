@@ -1,5 +1,7 @@
 package service;
 
+import model.User;
+
 public interface UserService {
 
     /**
@@ -11,4 +13,8 @@ public interface UserService {
     boolean login(String username, String password);
 
     boolean loginIsBusy(String username);
+
+    boolean userRegistration(User user);
+
+
 }

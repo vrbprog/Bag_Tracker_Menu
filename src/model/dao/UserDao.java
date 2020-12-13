@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UserDao {
 
-    void saveUser(User user);
+    boolean saveUser(User user);
 
     void deleteUser(User user);
 

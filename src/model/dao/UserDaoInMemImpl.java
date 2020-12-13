@@ -30,8 +30,8 @@ public class UserDaoInMemImpl implements UserDao{
     }
 
     @Override
-    public void saveUser(User user) {
-        users.add(user);
+    public boolean saveUser(User user) {
+        return users.add(user);
     }
 
     @Override

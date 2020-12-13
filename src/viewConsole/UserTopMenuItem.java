@@ -1,8 +1,9 @@
 package viewConsole;
 
 public enum UserTopMenuItem {
-    Create_ticket,
-    Edit_ticket,
-    My_tickets_list,
-    Dashboard
+    CREATE_TICKET,
+    EDIT_TICKET,
+    MY_TICKET_LIST,
+    MY_DASHBOARD,
+    RETURN_IN_LOGIN_MENU
 }

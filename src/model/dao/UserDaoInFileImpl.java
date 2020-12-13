@@ -18,9 +18,9 @@ public class UserDaoInFileImpl implements UserDao {
     }
 
     @Override
-    public void saveUser(User user) {
-        writeUserToFile(user);
+    public boolean saveUser(User user) {
         users.add(user);
+        return writeUserToFile(user);
     }
 
     @Override
@@ -74,13 +74,15 @@ public class UserDaoInFileImpl implements UserDao {
         }
     }
 
-    private void writeUserToFile(User user) {
+    private boolean writeUserToFile(User user) {
         try (
                 PrintWriter out = new PrintWriter(new FileWriter(nameFile, true))
         ) {
             out.println(user.getUserName() + regex + user.getPassword());
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

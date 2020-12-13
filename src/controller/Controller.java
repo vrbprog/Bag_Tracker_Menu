@@ -1,13 +1,18 @@
 package controller;
 
+import model.Ticket;
 import model.User;
+import model.dao.TicketDao;
+import model.dao.TicketDaoInMemImpl;
 import model.dao.UserDaoInFileImpl;
-import model.dao.UserDaoInMemImpl;
-import service.LoginUserService;
+import service.ClientUserService;
 import service.UserService;
 import viewConsole.*;
 import model.dao.UserDao;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,51 +20,37 @@ public class Controller {
 
     private BaseMenu loginMenu;
     private BaseMenu userTopMenu;
-    private UserDao userDao;
-    private Scanner scanner;
-    private UserService loginService;
+    private final Scanner scanner;
+    private final UserService clientUserService;
+    private User currentUser;
     private final List<MenuItem> listLoginMenuItem = new ArrayList<>();
     private final List<MenuItem> listUserTopMenuItem = new ArrayList<>();
 
     public Controller() {
-        init();
-    }
-
-    private void init() {
-        listLoginMenuItem.add(new HeaderMenuItem("Login menu"));
-        listLoginMenuItem.addAll(Arrays
-                .stream(LoginMenuItem.values()).map(loginItem ->
-                        new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList()));
-        listLoginMenuItem.add(new BottomMenuItem("0. Exit from program"));
-        loginMenu = new BaseMenu(listLoginMenuItem);
-
-        listUserTopMenuItem.add(new HeaderMenuItem("User top menu"));
-        listUserTopMenuItem.addAll(Arrays
-                .stream(UserTopMenuItem.values()).map(loginItem ->
-                        new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList()));
-        listUserTopMenuItem.add(new BottomMenuItem("0. Exit to login menu"));
-        userTopMenu = new BaseMenu(listUserTopMenuItem);
-
-        scanner = new Scanner(System.in);
+        UserDao userDao = new UserDaoInFileImpl();
         //userDao = new UserDaoInMemImpl();
-        userDao = new UserDaoInFileImpl();
-        loginService = new LoginUserService(userDao);
+        TicketDao ticketDao = new TicketDaoInMemImpl();
+        clientUserService = new ClientUserService(userDao);
+        createLoginMenu();
+        createUserTopMenu();
+        scanner = new Scanner(System.in);
     }
 
     public void run() {
-
-        boolean exitFlagTopMenu;
-        do {
+        while (true) {
             while (!getChoiceUserLoginMenu()) {
-                System.out.println("********************");
-                System.out.println("Incorrect data entry. Repeat again ");
+                printInvalidMessage();
             }
+            while (!getChoiceUserTopMenu()) {
+                printInvalidMessage();
+            }
+        }
 
-            exitFlagTopMenu = getChoiceUserTopMenu();
-
-//            String[] params = {"userTest", "88888"};
+        //
+        //
+        //
+        //
+        //            String[] params = {"userTest", "88888"};
 //            userDao.updateUser(userDao
 //                    .getAll()
 //                    .get(1), params);
@@ -67,14 +58,28 @@ public class Controller {
 //                    .getAll()
 //                    .get(3));
 
-        } while (exitFlagTopMenu);
 
-        //
-        //
-        //
-        //
+        //System.exit(0);
+    }
 
-        System.exit(0);
+    private void createLoginMenu() {
+        listLoginMenuItem.add(new HeaderMenuItem("Login menu"));
+        listLoginMenuItem.addAll(Arrays
+                .stream(LoginMenuItem.values()).map(loginItem ->
+                        new MenuItem(loginItem.toString()))
+                .collect(Collectors.toList()));
+        listLoginMenuItem.add(new BottomMenuItem("0. Exit from program"));
+        loginMenu = new BaseMenu(listLoginMenuItem);
+    }
+
+    private void createUserTopMenu() {
+        listUserTopMenuItem.add(new HeaderMenuItem("User top menu"));
+        listUserTopMenuItem.addAll(Arrays
+                .stream(UserTopMenuItem.values()).map(loginItem ->
+                        new MenuItem(loginItem.toString()))
+                .collect(Collectors.toList()));
+        listUserTopMenuItem.add(new BottomMenuItem("0. Exit from program"));
+        userTopMenu = new BaseMenu(listUserTopMenuItem);
     }
 
     private boolean getChoiceUserLoginMenu() {
@@ -88,7 +93,7 @@ public class Controller {
                 return registerSubMenu(scanner);
             }
             case 0: {
-                System.exit(0);
+                systemOut();
             }
             default: {
                 return false;
@@ -100,25 +105,27 @@ public class Controller {
         switch (userTopMenu.show()) {
             case 1: {
                 System.out.println("Creating ticket ....");
-                return false;
+                return createTicketSubMenu(scanner);
             }
             case 2: {
                 System.out.println("Editing ticket .... ");
-                return false;
+                return true;
             }
             case 3: {
                 System.out.println("My tickets list ....");
-                return false;
+                return true;
             }
             case 4: {
                 System.out.println("Dashboard .... ");
-                return false;
-            }
-            case 0: {
                 return true;
             }
+            case 5: {
+                return true;
+            }
+            case 0: {
+                systemOut();
+            }
             default: {
-                System.out.println("Incorrect input data");
                 return false;
             }
         }
@@ -131,7 +138,8 @@ public class Controller {
         System.out.print("Input password: ");
         String password = scanner.nextLine();
 
-        if (loginService.login(login, password)) {
+        if (clientUserService.login(login, password)) {
+            currentUser = new User(login, password);
             printMessageMenu("Hello. You are login in system");
             return true;
         } else {
@@ -148,7 +156,7 @@ public class Controller {
         System.out.print("Enter login: ");
         login = scanner.nextLine();
 
-        if (loginService.loginIsBusy(login)) {
+        if (clientUserService.loginIsBusy(login)) {
             printMessageMenu("This login is busy");
             return false;
         }
@@ -162,13 +170,75 @@ public class Controller {
             printMessageMenu("Confirm of password failed");
             return false;
         }
-        userDao.saveUser(new User(login, password));
-        printMessageMenu("Hello. You are registered in system");
-        return true;
+        currentUser = new User(login, password);
+        if(clientUserService.userRegistration(currentUser)) {
+            printMessageMenu("Hello. You are registered in system");
+            return true;
+        }else{
+            printMessageMenu("Registration failed!");
+            return false;
+        }
+    }
+
+    private boolean createTicketSubMenu(Scanner scanner) {
+        System.out.print("Input name of ticket: ");
+        String nameTicket = scanner.nextLine();
+
+        System.out.print("Input description of ticket: ");
+        String description = scanner.nextLine();
+
+        String reporterUser = null;
+        boolean noNameUser = true;
+        while (noNameUser) {
+            System.out.print("Input name of reporter user: ");
+            reporterUser = scanner.nextLine();
+            if (clientUserService.loginIsBusy(reporterUser)) {
+                noNameUser = false;
+            } else {
+                System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
+                if (scanner.nextLine().equals("n")) return false;
+            }
+        }
+
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date estDate = null;
+        while (estDate == null) {
+            System.out.println("Enter estimated deadline date in the format yyyy-MM-dd");
+            System.out.println("For example, it is now " + format.format(new Date()));
+            String line = scanner.nextLine();
+            try {
+                estDate = format.parse(line);
+            } catch (ParseException e) {
+                System.out.print("Sorry, that's not valid. Do you want to try again. (y/n): ");
+                if (scanner.nextLine().equals("n")) return false;
+            }
+        }
+        System.out.println(format.format(estDate));
+
+        Ticket newTicket = new Ticket(nameTicket, description,
+                currentUser.getUserName(),
+                reporterUser, new Date(), estDate);
+        printMessageMenu("You create ticket:");
+        System.out.println(newTicket);
+        printMessageMenu("For return in menu press Enter");
+        scanner.nextLine();
+        return false;
+
+    }
+
+    private void systemOut() {
+        System.out.println("********************");
+        System.out.println("You exit from program. Bye-Bye!");
+        System.exit(0);
     }
 
     private void printMessageMenu(String mes) {
         System.out.println("--------------------");
         System.out.println(mes);
+    }
+
+    private void printInvalidMessage() {
+        System.out.println("********************");
+        System.out.println("Incorrect data entry. Repeat again ");
     }
 }
