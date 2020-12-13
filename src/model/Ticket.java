@@ -24,6 +24,10 @@ public class Ticket {
         this.estimatedTime = estimatedTime;
     }
 
+    public String getReporterName() {
+        return reporter;
+    }
+
     @Override
     public String toString() {
         return "Ticket{" +

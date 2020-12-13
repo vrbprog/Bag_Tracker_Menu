@@ -5,7 +5,9 @@ import model.User;
 import model.dao.TicketDao;
 import model.dao.TicketDaoInMemImpl;
 import model.dao.UserDaoInFileImpl;
+import service.ClientTicketService;
 import service.ClientUserService;
+import service.TicketService;
 import service.UserService;
 import viewConsole.*;
 import model.dao.UserDao;
@@ -22,6 +24,7 @@ public class Controller {
     private BaseMenu userTopMenu;
     private final Scanner scanner;
     private final UserService clientUserService;
+    private final TicketService clientTicketService;
     private User currentUser;
     private final List<MenuItem> listLoginMenuItem = new ArrayList<>();
     private final List<MenuItem> listUserTopMenuItem = new ArrayList<>();
@@ -29,8 +32,9 @@ public class Controller {
     public Controller() {
         UserDao userDao = new UserDaoInFileImpl();
         //userDao = new UserDaoInMemImpl();
-        TicketDao ticketDao = new TicketDaoInMemImpl();
         clientUserService = new ClientUserService(userDao);
+        TicketDao ticketDao = new TicketDaoInMemImpl();
+        clientTicketService = new ClientTicketService(ticketDao);
         createLoginMenu();
         createUserTopMenu();
         scanner = new Scanner(System.in);
@@ -38,11 +42,11 @@ public class Controller {
 
     public void run() {
         while (true) {
-            while (!getChoiceUserLoginMenu()) {
+            while (getChoiceUserLoginMenu()) {
                 printInvalidMessage();
             }
-            while (!getChoiceUserTopMenu()) {
-                printInvalidMessage();
+            while (getChoiceUserTopMenu()) {
+                System.out.println("********************");
             }
         }
 
@@ -96,7 +100,7 @@ public class Controller {
                 systemOut();
             }
             default: {
-                return false;
+                return true;
             }
         }
     }
@@ -113,6 +117,7 @@ public class Controller {
             }
             case 3: {
                 System.out.println("My tickets list ....");
+                showUserTickets();
                 return true;
             }
             case 4: {
@@ -120,13 +125,13 @@ public class Controller {
                 return true;
             }
             case 5: {
-                return true;
+                return false;
             }
             case 0: {
                 systemOut();
             }
             default: {
-                return false;
+                return true;
             }
         }
     }
@@ -140,11 +145,11 @@ public class Controller {
 
         if (clientUserService.login(login, password)) {
             currentUser = new User(login, password);
-            printMessageMenu("Hello. You are login in system");
-            return true;
+            printMessageMenu("Hello " + login + ". You are login in system");
+            return false;
         } else {
             printMessageMenu("Wrong username/password");
-            return false;
+            return true;
         }
     }
 
@@ -158,7 +163,7 @@ public class Controller {
 
         if (clientUserService.loginIsBusy(login)) {
             printMessageMenu("This login is busy");
-            return false;
+            return true;
         }
         System.out.print("Enter password: ");
         password = scanner.nextLine();
@@ -168,15 +173,15 @@ public class Controller {
 
         if (!password.equals(passwordConfirm)) {
             printMessageMenu("Confirm of password failed");
-            return false;
+            return true;
         }
         currentUser = new User(login, password);
         if(clientUserService.userRegistration(currentUser)) {
-            printMessageMenu("Hello. You are registered in system");
-            return true;
+            printMessageMenu("Hello " + login + ". You are registered in system");
+            return false;
         }else{
             printMessageMenu("Registration failed!");
-            return false;
+            return true;
         }
     }
 
@@ -196,7 +201,7 @@ public class Controller {
                 noNameUser = false;
             } else {
                 System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
-                if (scanner.nextLine().equals("n")) return false;
+                if (scanner.nextLine().equals("n")) return true;
             }
         }
 
@@ -210,20 +215,27 @@ public class Controller {
                 estDate = format.parse(line);
             } catch (ParseException e) {
                 System.out.print("Sorry, that's not valid. Do you want to try again. (y/n): ");
-                if (scanner.nextLine().equals("n")) return false;
+                if (scanner.nextLine().equals("n")) return true;
             }
         }
-        System.out.println(format.format(estDate));
-
         Ticket newTicket = new Ticket(nameTicket, description,
                 currentUser.getUserName(),
                 reporterUser, new Date(), estDate);
-        printMessageMenu("You create ticket:");
-        System.out.println(newTicket);
+        if(clientTicketService.createTicket(newTicket)) {
+            printMessageMenu(currentUser.getUserName() + " create ticket:");
+            System.out.println(newTicket);
+            printMessageMenu("For return in menu press Enter");
+            scanner.nextLine();
+        }else{
+            printMessageMenu("Writing ticket failed!");
+        }
+        return true;
+    }
+
+    private void showUserTickets(){
+        clientTicketService.showUserTicket(currentUser);
         printMessageMenu("For return in menu press Enter");
         scanner.nextLine();
-        return false;
-
     }
 
     private void systemOut() {

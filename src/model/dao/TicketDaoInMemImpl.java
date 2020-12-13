@@ -12,12 +12,12 @@ public class TicketDaoInMemImpl implements TicketDao{
     }
 
     @Override
-    public void saveTicket(Ticket ticket) {
-        tickets.add(ticket);
+    public boolean saveTicket(Ticket ticket) {
+        return tickets.add(ticket);
     }
 
     @Override
     public List<Ticket> getAll() {
-        return null;
+        return tickets;
     }
 }

@@ -5,3 +5,5 @@ Jon:111
 vrb:1975
 Cat:cat
 Hub:hub
+Sun:sunny
+dron:dron
