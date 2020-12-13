@@ -18,22 +18,28 @@ public class Controller {
     private UserDao userDao;
     private Scanner scanner;
     private UserService loginService;
+    private final List<MenuItem> listLoginMenuItem = new ArrayList<>();
+    private final List<MenuItem> listUserTopMenuItem = new ArrayList<>();
 
     public Controller() {
         init();
     }
 
     private void init() {
-        List<MenuItem> listLoginMenuItem = Arrays
+        listLoginMenuItem.add(new HeaderMenuItem("Login menu"));
+        listLoginMenuItem.addAll(Arrays
                 .stream(LoginMenuItem.values()).map(loginItem ->
                         new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        listLoginMenuItem.add(new BottomMenuItem("0. Exit from program"));
         loginMenu = new BaseMenu(listLoginMenuItem);
 
-        List<MenuItem> listUserTopMenuItem = Arrays
+        listUserTopMenuItem.add(new HeaderMenuItem("User top menu"));
+        listUserTopMenuItem.addAll(Arrays
                 .stream(UserTopMenuItem.values()).map(loginItem ->
                         new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        listUserTopMenuItem.add(new BottomMenuItem("0. Exit to login menu"));
         userTopMenu = new BaseMenu(listUserTopMenuItem);
 
         scanner = new Scanner(System.in);
@@ -72,9 +78,7 @@ public class Controller {
     }
 
     private boolean getChoiceUserLoginMenu() {
-        String headerLoginMenu = "Login menu";
-        String exitLoginMenu = "0. Exit from program";
-        switch (loginMenu.show(headerLoginMenu, exitLoginMenu)) {
+        switch (loginMenu.show()) {
             case 1: {
                 System.out.println("Login ....");
                 return loginSubMenu(scanner);
@@ -93,9 +97,7 @@ public class Controller {
     }
 
     private boolean getChoiceUserTopMenu() {
-        String headerUserTopMenu = "User top menu";
-        String exitUserTopMenu = "0. Exit to login menu";
-        switch (userTopMenu.show(headerUserTopMenu, exitUserTopMenu)) {
+        switch (userTopMenu.show()) {
             case 1: {
                 System.out.println("Creating ticket ....");
                 return false;
@@ -157,7 +159,7 @@ public class Controller {
         passwordConfirm = scanner.nextLine();
 
         if (!password.equals(passwordConfirm)) {
-            printMessageMenu("Password confirmation failed");
+            printMessageMenu("Confirm of password failed");
             return false;
         }
         userDao.saveUser(new User(login, password));

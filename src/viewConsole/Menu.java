@@ -3,13 +3,15 @@ package viewConsole;
 import java.util.List;
 
 public interface Menu {
-    int show(String header, String exit);
+    int show();
 
     default void showItems(List<MenuItem> items) {
         int i = 1;
         for (MenuItem item : items) {
-            System.out.println("--------------------");
-            System.out.println((i++) + ". " + item.getNameItem());
+            if(item.isItemBodyMenu()) {
+                System.out.println("--------------------");
+                System.out.println((i++) + ". " + item.getNameItem());
+            }
         }
     }
 }
