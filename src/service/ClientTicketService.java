@@ -7,6 +7,7 @@ import model.dao.UserDao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ClientTicketService implements TicketService{
@@ -33,8 +34,20 @@ public class ClientTicketService implements TicketService{
                 System.out.println(ticket);
             }
         }else{
-            System.out.println("You have no tickets for which you are reportable");
+            System.out.println("Sorry, you have no tickets for which you are reportable");
         }
+
+    }
+
+    @Override
+    public Ticket getTicketByName(String nameTicket) {
+//        boolean isTicketWithName = ticketDao.getAll().stream()
+//                .filter(ticket -> ticket.getTicketName()
+//                        .equals(nameTicket)).count() == 1;
+//        if(isTicketWithName)
+        return  ticketDao.getAll().stream()
+                .filter(ticket -> ticket.getTicketName()
+                        .equals(nameTicket)).findFirst().orElse(null);
 
     }
 }

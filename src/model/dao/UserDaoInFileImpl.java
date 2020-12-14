@@ -36,10 +36,9 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public User getUserByName(String userName) {
-        Optional<User> optionalUser = users.stream()
+        return users.stream()
                 .filter(user -> user.getUserName()
-                        .equals(userName)).findFirst();
-        return optionalUser.orElseGet(User::new);
+                        .equals(userName)).findFirst().orElse(null);
     }
 
     @Override

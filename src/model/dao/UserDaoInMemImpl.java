@@ -13,15 +13,13 @@ public class UserDaoInMemImpl implements UserDao{
     public UserDaoInMemImpl() {
         users.add(new User("admin", "***"));
         users.add(new User("guest", "123"));
-        users.add(new User("userTest", "123"));
     }
 
     @Override
     public User getUserByName(String userName) {
-        Optional<User> optionalUser = users.stream()
+        return users.stream()
                 .filter(user -> user.getUserName()
-                        .equals(userName)).findFirst();
-        return optionalUser.orElseGet(User::new);
+                        .equals(userName)).findFirst().orElse(null);
     }
 
     @Override

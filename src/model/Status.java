@@ -1,7 +1,7 @@
 package model;
 
 public enum Status {
-    WAIT,
+    TODO,
     IN_WORK,
     REVIEW,
     NEED_REFACTORING,
