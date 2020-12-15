@@ -2,6 +2,8 @@ package service;
 
 import model.User;
 
+import java.io.IOException;
+
 public interface UserService {
 
     /**
@@ -14,7 +16,7 @@ public interface UserService {
 
     boolean loginIsBusy(String username);
 
-    boolean userRegistration(User user);
+    boolean userRegistration(User user) throws IOException;
 
 
 }

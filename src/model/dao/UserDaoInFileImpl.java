@@ -10,7 +10,7 @@ public class UserDaoInFileImpl implements UserDao {
     private final String nameFile;
     private final String regex = ":";
 
-    public UserDaoInFileImpl() {
+    public UserDaoInFileImpl() throws FileNotFoundException {
         nameFile = "src" + File.separator +
                 "resources" + File.separator +
                 "userDB.txt";
@@ -18,13 +18,13 @@ public class UserDaoInFileImpl implements UserDao {
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public void saveUser(User user) throws IOException {
         users.add(user);
-        return writeUserToFile(user);
+        writeUserToFile(user);
     }
 
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(User user) throws IOException {
         updateUserFromFile(user,"");
         users.remove(user);
     }
@@ -42,7 +42,7 @@ public class UserDaoInFileImpl implements UserDao {
     }
 
     @Override
-    public void updateUser(User user, String[] params) {
+    public void updateUser(User user, String[] params) throws IOException {
         User newUser = new User();
         newUser.setUserName(Objects.requireNonNull(
                 params[0], "Name cannot be null"));
@@ -59,57 +59,62 @@ public class UserDaoInFileImpl implements UserDao {
         users.add(new User(array[0], array[1]));
     }
 
-    private void loadUsersFromFile(String nameFile) {
+    private void loadUsersFromFile(String nameFile) throws FileNotFoundException{
+
         try (
-                FileReader fileReader = new FileReader(nameFile);
-                BufferedReader reader = new BufferedReader(fileReader)
+             FileReader fileReader = new FileReader(nameFile);
+             BufferedReader reader = new BufferedReader(fileReader)
         ) {
             String currentLine;
             while ((currentLine = reader.readLine()) != null) {
                 addUserFromLine(currentLine);
             }
+        } catch (FileNotFoundException e) {
+            throw e;
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private boolean writeUserToFile(User user) {
-        try (
-                PrintWriter out = new PrintWriter(new FileWriter(nameFile, true))
-        ) {
-            out.println(user.getUserName() + regex + user.getPassword());
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    private void writeUserToFile(User user) throws IOException {
+        File file = new File(nameFile);
+        if (file.exists()) {
+            try (
+                    PrintWriter out = new PrintWriter(new FileWriter(file, true))
+            ) {
+                out.println(user.getUserName() + regex + user.getPassword());
+            } catch (IOException e) {
+                throw e;
+            }
+        }else{
+            throw new IOException("File not found");
         }
     }
 
-    private void updateUserFromFile(User user, String update) {
-        Scanner sc = null;
+    private void updateUserFromFile(User user, String update) throws IOException {
+        Scanner sc;
         try {
             sc = new Scanner(new File(nameFile));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw e;
         }
         String fileContents;
         StringBuilder buffer = new StringBuilder();
-        if(sc != null) {
-            while (sc.hasNextLine()) {
-                buffer.append(sc.nextLine()).append(System.lineSeparator());
-            }
-            fileContents = buffer.toString();
-            sc.close();
-            fileContents = fileContents.replaceAll(user.getUserName() + regex +
-                    user.getPassword() + System.lineSeparator(), update);
-            FileWriter writer;
-            try {
-                writer = new FileWriter(nameFile);
-                writer.append(fileContents);
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+        while (sc.hasNextLine()) {
+            buffer.append(sc.nextLine()).append(System.lineSeparator());
+        }
+        fileContents = buffer.toString();
+        sc.close();
+        fileContents = fileContents.replaceAll(user.getUserName() + regex +
+                user.getPassword() + System.lineSeparator(), update);
+        FileWriter writer;
+        try {
+            writer = new FileWriter(nameFile);
+            writer.append(fileContents);
+            writer.flush();
+        } catch (IOException e) {
+            throw e;
         }
     }
 }

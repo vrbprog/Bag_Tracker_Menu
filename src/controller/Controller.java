@@ -1,5 +1,6 @@
 package controller;
 
+import model.Status;
 import model.Ticket;
 import model.User;
 import model.dao.TicketDao;
@@ -12,6 +13,8 @@ import service.UserService;
 import viewConsole.*;
 import model.dao.UserDao;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,12 +26,13 @@ public class Controller {
     private final BaseMenu loginMenu;
     private final BaseMenu userTopMenu;
     private final BaseMenu userEditSubMenu;
+    private final BaseMenu userEditStatusSubMenu;
     private final Scanner scanner;
     private final UserService clientUserService;
     private final TicketService clientTicketService;
     private User currentUser;
 
-    public Controller() {
+    public Controller() throws FileNotFoundException {
         UserDao userDao = new UserDaoInFileImpl();
         //userDao = new UserDaoInMemImpl();
         TicketDao ticketDao = new TicketDaoInMemImpl();
@@ -37,6 +41,7 @@ public class Controller {
         loginMenu = createLoginMenu();
         userTopMenu = createUserTopMenu();
         userEditSubMenu = createUserEditSubMenu();
+        userEditStatusSubMenu = createUserEditStatusSubMenu();
         scanner = new Scanner(System.in);
     }
 
@@ -44,6 +49,7 @@ public class Controller {
         while (true) {
             while (getChoiceUserLoginMenu()) {
                 printInvalidMessage();
+                //System.out.println("********************");
             }
             while (getChoiceUserTopMenu()) {
                 System.out.println("********************");
@@ -134,6 +140,17 @@ public class Controller {
         return new BaseMenu(listUserEditSubMenuItem);
     }
 
+    private BaseMenu createUserEditStatusSubMenu() {
+        List<MenuItem> listUserEditSubMenuItem = new ArrayList<>();
+        listUserEditSubMenuItem.add(new HeaderMenuItem("Edit status menu"));
+        listUserEditSubMenuItem.addAll(Arrays
+                .stream(Status.values()).map(loginItem ->
+                        new MenuItem(loginItem.toString()))
+                .collect(Collectors.toList()));
+        listUserEditSubMenuItem.add(new BottomMenuItem("0. Exit from edit menu"));
+        return new BaseMenu(listUserEditSubMenuItem);
+    }
+
     private boolean loginSubMenu(Scanner scanner) {
         System.out.print("Input login: ");
         String login = scanner.nextLine();
@@ -173,14 +190,21 @@ public class Controller {
             printMessageMenu("Confirm of password failed");
             return true;
         }
-        currentUser = new User(login, password);
-        if (clientUserService.userRegistration(currentUser)) {
-            printMessageMenu("Hello " + login + ". You are registered in system");
-            return false;
-        } else {
-            printMessageMenu("Registration failed!");
-            return true;
-        }
+
+            currentUser = new User(login, password);
+            try {
+                if (clientUserService.userRegistration(currentUser)) {
+                    printMessageMenu("Hello " + login + ". You are registered in system");
+                    return false;
+                }else{
+                    printMessageMenu("Registration failed!");
+                    return true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                printMessageMenu("Error access to file DB");
+                return true;
+            }
     }
 
     private boolean createTicketSubMenu(Scanner scanner) {
@@ -190,18 +214,7 @@ public class Controller {
         System.out.print("Input description of ticket: ");
         String description = scanner.nextLine();
 
-        String reporterUser = null;
-        boolean noValidNameUser = true;
-        while (noValidNameUser) {
-            System.out.print("Input name of reporter user: ");
-            reporterUser = scanner.nextLine();
-            if (clientUserService.loginIsBusy(reporterUser)) {
-                noValidNameUser = false;
-            } else {
-                System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
-                if (scanner.nextLine().equals("n")) return true;
-            }
-        }
+        String reporterUser = getReporterUser();
 
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Date estDate = null;
@@ -237,36 +250,47 @@ public class Controller {
     }
 
     private boolean editTicket(Scanner scanner) {
-        Ticket editTicket;
+        Ticket editTicket = null;
         boolean nameTickerNoPresent = true;
         while (nameTickerNoPresent) {
             System.out.print("Input name of editing ticket: ");
             String ticketName = scanner.nextLine();
             editTicket = clientTicketService.getTicketByName(ticketName);
             if (editTicket != null) {
-                nameTickerNoPresent = false;
-                System.out.print("Editing ticket: ");
-                System.out.println(editTicket);
+                if(currentUser.getUserName().equals(editTicket.getAssignee())) {
+                    nameTickerNoPresent = false;
+                    System.out.print("Editing ");
+                    System.out.println(editTicket);
+                }else{
+                    System.out.println("Sorry, you are not the one who assigned this ticket ");
+                    return true;
+                }
             } else {
                 System.out.print("Sorry, that's not valid name of ticket. Do you want to try again. (y/n): ");
                 if (scanner.nextLine().equals("n")) return true;
             }
         }
 
-        printMessageMenu("You can edit fields: reporter, status and priority");
+        printMessageMenu("You can edit fields: reporter, status, priority and estimated time");
         boolean isEditingTicket = true;
         while (isEditingTicket) {
             switch (userEditSubMenu.show()) {
                 case 1: {
                     System.out.println("Editing reporter ....");
+                    editReporterSubMenu(editTicket);
                     break;
                 }
                 case 2: {
                     System.out.println("Editing status .... ");
+                    showEditStatusMenu(editTicket);
                     break;
                 }
                 case 3: {
                     System.out.println("Editing priority ....");
+                    break;
+                }
+                case 4: {
+                    System.out.println("Editing estimated time ....");
                     break;
                 }
                 case 0: {
@@ -279,6 +303,82 @@ public class Controller {
             }
         }
         return true;
+   }
+
+    private void showEditStatusMenu(Ticket editTic){
+        boolean flag = true;
+        Ticket updateTicket = new Ticket(editTic);
+        while(flag) {
+            switch (userEditStatusSubMenu.show()) {
+                case 1: {
+                    updateTicket.setStatus(Status.TO_DO);
+                    flag = false;
+                    break;
+                }
+                case 2: {
+                    updateTicket.setStatus(Status.IN_WORK);
+                    flag = false;
+                    break;
+                }
+                case 3: {
+                    updateTicket.setStatus(Status.REVIEW);
+                    flag = false;
+                    break;
+                }
+                case 4: {
+                    updateTicket.setStatus(Status.NEED_REFACTORING);
+                    flag = false;
+                    break;
+                }
+                case 5: {
+                    updateTicket.setStatus(Status.DONE);
+                    flag = false;
+                    break;
+                }
+                case 0: {
+                    flag = false;
+                    break;
+                }
+                default: {
+                    flag = true;
+                    break;
+                }
+            }
+        }
+        //Service updateTicket
+        printMessageMenu(currentUser.getUserName() + " edited status of ticket");
+        System.out.println("Edited " + updateTicket);
+        printMessageMenu("For return in menu press Enter");
+        scanner.nextLine();
+    }
+
+   private void editReporterSubMenu(Ticket editTic){
+       String inputReporterUser = getReporterUser();
+       if(inputReporterUser != null){
+           Ticket updateTicket = new Ticket(editTic);
+           updateTicket.setReporter(inputReporterUser);
+           //Service updateTicket
+           printMessageMenu(currentUser.getUserName() + " edited reporter of ticket");
+           System.out.println("Edited " + updateTicket);
+           printMessageMenu("For return in menu press Enter");
+           scanner.nextLine();
+       }
+   }
+
+   private String getReporterUser(){
+       String inputReporterUser = null;
+       boolean noValidNameUser = true;
+       while (noValidNameUser) {
+           System.out.print("Input name of reporter user: ");
+           inputReporterUser = scanner.nextLine();
+           if (clientUserService.loginIsBusy(inputReporterUser)) {
+               noValidNameUser = false;
+           } else {
+               System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
+               if (scanner.nextLine().equals("n")) return null;
+           }
+       }
+       return inputReporterUser;
    }
 
     private void showDashboard() {

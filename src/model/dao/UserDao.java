@@ -2,18 +2,18 @@ package model.dao;
 
 import model.User;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserDao {
 
-    boolean saveUser(User user);
+    void saveUser(User user) throws IOException;
 
-    void deleteUser(User user);
+    void deleteUser(User user) throws IOException;
 
     List<User> getAll();
 
     User getUserByName(String userName);
 
-    void updateUser(User user, String[] params);
+    void updateUser(User user, String[] params) throws IOException;
 }

@@ -2,10 +2,10 @@ package model.dao;
 
 import model.User;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class UserDaoInMemImpl implements UserDao{
     private final List<User> users = new ArrayList<>();
@@ -28,8 +28,8 @@ public class UserDaoInMemImpl implements UserDao{
     }
 
     @Override
-    public boolean saveUser(User user) {
-        return users.add(user);
+    public void saveUser(User user) {
+         users.add(user);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class UserDaoInMemImpl implements UserDao{
     }
 
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(User user){
         users.remove(user);
     }
 }

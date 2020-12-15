@@ -7,9 +7,9 @@ public class Ticket {
     private final String ticketName;
     private final String description;
     private final String assignee;
-    private final String reporter;
+    private String reporter;
     private final Date spentTime;
-    private final Date estimatedTime;
+    private Date estimatedTime;
     private Status status;
     private Priority priority;
 
@@ -24,8 +24,18 @@ public class Ticket {
         this.reporter = reporter;
         this.spentTime = new Date();
         this.estimatedTime = estimatedTime;
-        this.status = Status.TODO;
+        this.status = Status.TO_DO;
         this.priority = Priority.LOW;
+    }
+    public Ticket (Ticket copy){
+        this.ticketName = copy.getTicketName();
+        this.description = copy.getDescription();
+        this.assignee = copy.getAssignee();
+        this.reporter = copy.getReporterName();
+        this.spentTime = copy.getSpentTime();
+        this.estimatedTime = copy.getEstimatedTime();
+        this.status = copy.getStatus();
+        this.priority = copy.getPriority();
     }
 
     public String getTicketName() {
@@ -52,6 +62,30 @@ public class Ticket {
         return estimatedTime;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setReporter(String reporter) {
+        this.reporter = reporter;
+    }
+
+    public void setEstimatedTime(Date estimatedTime) {
+        this.estimatedTime = estimatedTime;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
     @Override
     public String toString() {
         return "Ticket{" +
@@ -62,7 +96,7 @@ public class Ticket {
                 "\n\r  spentTime = " + spentTime +
                 "\n\r  estimatedTime = " + estimatedTime +
                 "\n\r  status = " + status + " " +
-                "\n\r  status = " + priority + " " +
+                "\n\r  priority = " + priority + " " +
                 '}';
     }
 }
