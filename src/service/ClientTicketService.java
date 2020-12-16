@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ClientTicketService implements TicketService{
+public class ClientTicketService implements TicketService {
 
     private final TicketDao ticketDao;
 
@@ -29,23 +29,18 @@ public class ClientTicketService implements TicketService{
         list = ticketDao.getAll().stream()
                 .filter(ticket -> ticket.getReporterName()
                         .equals(user.getUserName())).collect(Collectors.toList());
-        if(list.size()>0){
-            for (Ticket ticket: list) {
+        if (list.size() > 0) {
+            for (Ticket ticket : list) {
                 System.out.println(ticket);
             }
-        }else{
-            System.out.println("Sorry, you have no tickets for which you are reportable");
+        } else {
+            System.out.println("You have no tickets for which you are reportable");
         }
-
     }
 
     @Override
     public Ticket getTicketByName(String nameTicket) {
-//        boolean isTicketWithName = ticketDao.getAll().stream()
-//                .filter(ticket -> ticket.getTicketName()
-//                        .equals(nameTicket)).count() == 1;
-//        if(isTicketWithName)
-        return  ticketDao.getAll().stream()
+        return ticketDao.getAll().stream()
                 .filter(ticket -> ticket.getTicketName()
                         .equals(nameTicket)).findFirst().orElse(null);
 

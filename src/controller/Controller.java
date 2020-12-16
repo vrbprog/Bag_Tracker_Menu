@@ -1,5 +1,6 @@
 package controller;
 
+import model.Priority;
 import model.Status;
 import model.Ticket;
 import model.User;
@@ -15,6 +16,7 @@ import model.dao.UserDao;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +29,7 @@ public class Controller {
     private final BaseMenu userTopMenu;
     private final BaseMenu userEditSubMenu;
     private final BaseMenu userEditStatusSubMenu;
+    private final BaseMenu userEditPrioritySubMenu;
     private final Scanner scanner;
     private final UserService clientUserService;
     private final TicketService clientTicketService;
@@ -38,10 +41,16 @@ public class Controller {
         TicketDao ticketDao = new TicketDaoInMemImpl();
         clientUserService = new ClientUserService(userDao);
         clientTicketService = new ClientTicketService(ticketDao);
-        loginMenu = createLoginMenu();
-        userTopMenu = createUserTopMenu();
-        userEditSubMenu = createUserEditSubMenu();
-        userEditStatusSubMenu = createUserEditStatusSubMenu();
+        loginMenu = createMenu(LoginMenuItem.values(),
+                "Login menu", "0. Exit from program");
+        userTopMenu = createMenu(UserTopMenuItem.values(),
+                "User top menu", "0. Exit from program");
+        userEditSubMenu = createMenu(UserEditSubMenuItem.values(),
+                "User edit menu", "0. Exit from edit menu");
+        userEditStatusSubMenu = createMenu(Status.values(),
+                "Edit status menu", "0. Exit from edit menu");
+        userEditPrioritySubMenu = createMenu(Priority.values(),
+                "Edit priority menu", "0. Exit from edit menu");
         scanner = new Scanner(System.in);
     }
 
@@ -58,16 +67,17 @@ public class Controller {
     }
 
     private boolean getChoiceUserLoginMenu() {
+        final int LOGIN = 1, REGISTRATION = 2, EXIT = 0;
         switch (loginMenu.show()) {
-            case 1: {
+            case LOGIN: {
                 System.out.println("Login ....");
                 return loginSubMenu(scanner);
             }
-            case 2: {
+            case REGISTRATION: {
                 System.out.println("Registration .... ");
                 return registerSubMenu(scanner);
             }
-            case 0: {
+            case EXIT: {
                 systemOut();
             }
             default: {
@@ -77,28 +87,30 @@ public class Controller {
     }
 
     private boolean getChoiceUserTopMenu() {
+        final int CREATE_TICKET = 1, EDIT_TICKET = 2, MY_TICKET_LIST = 3,
+                MY_DASHBOARD = 4, RETURN_IN_LOGIN_MENU = 5, EXIT = 0;
         switch (userTopMenu.show()) {
-            case 1: {
+            case CREATE_TICKET: {
                 System.out.println("Creating ticket ....");
                 return createTicketSubMenu(scanner);
             }
-            case 2: {
+            case EDIT_TICKET: {
                 System.out.println("Editing ticket .... ");
                 return editTicket(scanner);
             }
-            case 3: {
+            case MY_TICKET_LIST: {
                 System.out.println("My tickets list ....");
                 showUserTickets();
                 return true;
             }
-            case 4: {
+            case MY_DASHBOARD: {
                 showDashboard();
                 return true;
             }
-            case 5: {
+            case RETURN_IN_LOGIN_MENU: {
                 return false;
             }
-            case 0: {
+            case EXIT: {
                 systemOut();
             }
             default: {
@@ -107,48 +119,15 @@ public class Controller {
         }
     }
 
-    private BaseMenu createLoginMenu() {
+    private <T extends Enum<T>> BaseMenu createMenu(T[] aValues, String header, String bottom) {
         List<MenuItem> listLoginMenuItem = new ArrayList<>();
-        listLoginMenuItem.add(new HeaderMenuItem("Login menu"));
+        listLoginMenuItem.add(new HeaderMenuItem(header));
         listLoginMenuItem.addAll(Arrays
-                .stream(LoginMenuItem.values()).map(loginItem ->
+                .stream(aValues).map(loginItem ->
                         new MenuItem(loginItem.toString()))
                 .collect(Collectors.toList()));
-        listLoginMenuItem.add(new BottomMenuItem("0. Exit from program"));
+        listLoginMenuItem.add(new BottomMenuItem(bottom));
         return new BaseMenu(listLoginMenuItem);
-    }
-
-    private BaseMenu createUserTopMenu() {
-        List<MenuItem> listUserTopMenuItem = new ArrayList<>();
-        listUserTopMenuItem.add(new HeaderMenuItem("User top menu"));
-        listUserTopMenuItem.addAll(Arrays
-                .stream(UserTopMenuItem.values()).map(loginItem ->
-                        new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList()));
-        listUserTopMenuItem.add(new BottomMenuItem("0. Exit from program"));
-        return new BaseMenu(listUserTopMenuItem);
-    }
-
-    private BaseMenu createUserEditSubMenu() {
-        List<MenuItem> listUserEditSubMenuItem = new ArrayList<>();
-        listUserEditSubMenuItem.add(new HeaderMenuItem("User edit menu"));
-        listUserEditSubMenuItem.addAll(Arrays
-                .stream(UserEditSubMenuItem.values()).map(loginItem ->
-                        new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList()));
-        listUserEditSubMenuItem.add(new BottomMenuItem("0. Exit from edit menu"));
-        return new BaseMenu(listUserEditSubMenuItem);
-    }
-
-    private BaseMenu createUserEditStatusSubMenu() {
-        List<MenuItem> listUserEditSubMenuItem = new ArrayList<>();
-        listUserEditSubMenuItem.add(new HeaderMenuItem("Edit status menu"));
-        listUserEditSubMenuItem.addAll(Arrays
-                .stream(Status.values()).map(loginItem ->
-                        new MenuItem(loginItem.toString()))
-                .collect(Collectors.toList()));
-        listUserEditSubMenuItem.add(new BottomMenuItem("0. Exit from edit menu"));
-        return new BaseMenu(listUserEditSubMenuItem);
     }
 
     private boolean loginSubMenu(Scanner scanner) {
@@ -191,20 +170,20 @@ public class Controller {
             return true;
         }
 
-            currentUser = new User(login, password);
-            try {
-                if (clientUserService.userRegistration(currentUser)) {
-                    printMessageMenu("Hello " + login + ". You are registered in system");
-                    return false;
-                }else{
-                    printMessageMenu("Registration failed!");
-                    return true;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                printMessageMenu("Error access to file DB");
+        currentUser = new User(login, password);
+        try {
+            if (clientUserService.userRegistration(currentUser)) {
+                printMessageMenu("Hello " + login + ". You are registered in system");
+                return false;
+            } else {
+                printMessageMenu("Registration failed!");
                 return true;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            printMessageMenu("Error access to file DB");
+            return true;
+        }
     }
 
     private boolean createTicketSubMenu(Scanner scanner) {
@@ -257,11 +236,11 @@ public class Controller {
             String ticketName = scanner.nextLine();
             editTicket = clientTicketService.getTicketByName(ticketName);
             if (editTicket != null) {
-                if(currentUser.getUserName().equals(editTicket.getAssignee())) {
+                if (currentUser.getUserName().equals(editTicket.getAssignee())) {
                     nameTickerNoPresent = false;
                     System.out.print("Editing ");
                     System.out.println(editTicket);
-                }else{
+                } else {
                     System.out.println("Sorry, you are not the one who assigned this ticket ");
                     return true;
                 }
@@ -287,10 +266,12 @@ public class Controller {
                 }
                 case 3: {
                     System.out.println("Editing priority ....");
+                    showEditPriorityMenu(editTicket);
                     break;
                 }
                 case 4: {
                     System.out.println("Editing estimated time ....");
+                    showEditEstimatedTime(editTicket);
                     break;
                 }
                 case 0: {
@@ -303,12 +284,12 @@ public class Controller {
             }
         }
         return true;
-   }
+    }
 
-    private void showEditStatusMenu(Ticket editTic){
+    private void showEditStatusMenu(Ticket editTic) {
         boolean flag = true;
         Ticket updateTicket = new Ticket(editTic);
-        while(flag) {
+        while (flag) {
             switch (userEditStatusSubMenu.show()) {
                 case 1: {
                     updateTicket.setStatus(Status.TO_DO);
@@ -348,38 +329,114 @@ public class Controller {
         //Service updateTicket
         printMessageMenu(currentUser.getUserName() + " edited status of ticket");
         System.out.println("Edited " + updateTicket);
-        printMessageMenu("For return in menu press Enter");
-        scanner.nextLine();
+        System.out.print("Do you want to save changes. (y/n): ");
+        if (scanner.nextLine().equals("y")) {
+            //Service updateTicket
+            System.out.println("Change in status has been saved");
+        }
     }
 
-   private void editReporterSubMenu(Ticket editTic){
-       String inputReporterUser = getReporterUser();
-       if(inputReporterUser != null){
-           Ticket updateTicket = new Ticket(editTic);
-           updateTicket.setReporter(inputReporterUser);
-           //Service updateTicket
-           printMessageMenu(currentUser.getUserName() + " edited reporter of ticket");
-           System.out.println("Edited " + updateTicket);
-           printMessageMenu("For return in menu press Enter");
-           scanner.nextLine();
-       }
-   }
+    private void showEditPriorityMenu(Ticket editTic) {
+        boolean flag = true;
+        Ticket updateTicket = new Ticket(editTic);
+        while (flag) {
+            switch (userEditPrioritySubMenu.show()) {
+                case 1: {
+                    updateTicket.setPriority(Priority.LOW);
+                    flag = false;
+                    break;
+                }
+                case 2: {
+                    updateTicket.setPriority(Priority.MIDDLE);
+                    flag = false;
+                    break;
+                }
+                case 3: {
+                    updateTicket.setPriority(Priority.HIGH);
+                    flag = false;
+                    break;
+                }
+                case 4: {
+                    updateTicket.setPriority(Priority.EXTRA_HIGH);
+                    flag = false;
+                    break;
+                }
+                case 0: {
+                    flag = false;
+                    break;
+                }
+                default: {
+                    flag = true;
+                    break;
+                }
+            }
+        }
 
-   private String getReporterUser(){
-       String inputReporterUser = null;
-       boolean noValidNameUser = true;
-       while (noValidNameUser) {
-           System.out.print("Input name of reporter user: ");
-           inputReporterUser = scanner.nextLine();
-           if (clientUserService.loginIsBusy(inputReporterUser)) {
-               noValidNameUser = false;
-           } else {
-               System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
-               if (scanner.nextLine().equals("n")) return null;
-           }
-       }
-       return inputReporterUser;
-   }
+        printMessageMenu(currentUser.getUserName() + " edited priority of ticket");
+        System.out.println("Edited " + updateTicket);
+        System.out.print("Do you want to save changes. (y/n): ");
+        if (scanner.nextLine().equals("y")) {
+            //Service updateTicket
+            System.out.println("Change in priority has been saved");
+        }
+    }
+
+    private void showEditEstimatedTime(Ticket editTic) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date estDate = null;
+        while (estDate == null) {
+            System.out.println("Enter new estimated deadline date in the format yyyy-MM-dd");
+            System.out.println("For example, it is now " + format.format(new Date()));
+            String line = scanner.nextLine();
+            try {
+                estDate = format.parse(line);
+                Ticket updateTicket = new Ticket(editTic);
+                updateTicket.setEstimatedTime(estDate);
+                printMessageMenu(currentUser.getUserName() + " edited estimated date of ticket");
+                System.out.println("Edited " + updateTicket);
+                System.out.print("Do you want to save changes. (y/n): ");
+                if (scanner.nextLine().equals("y")) {
+                    //Service updateTicket
+                    System.out.println("Change in estimated date has been saved");
+                }
+            } catch (ParseException e) {
+                System.out.print("Sorry, that's not valid. Do you want to try again. (y/n): ");
+                if (scanner.nextLine().equals("n")) return;
+            }
+        }
+    }
+
+    private void editReporterSubMenu(Ticket editTic) {
+        String inputReporterUser = getReporterUser();
+        if (inputReporterUser != null) {
+            Ticket updateTicket = new Ticket(editTic);
+            updateTicket.setReporter(inputReporterUser);
+            //Service updateTicket
+            printMessageMenu(currentUser.getUserName() + " edited reporter of ticket");
+            System.out.println("Edited " + updateTicket);
+            System.out.print("Do you want to save changes. (y/n): ");
+            if (scanner.nextLine().equals("y")) {
+                //Service updateTicket
+                System.out.println("Change in reporter of ticket has been saved");
+            }
+        }
+    }
+
+    private String getReporterUser() {
+        String inputReporterUser = null;
+        boolean noValidNameUser = true;
+        while (noValidNameUser) {
+            System.out.print("Input name of reporter user: ");
+            inputReporterUser = scanner.nextLine();
+            if (clientUserService.loginIsBusy(inputReporterUser)) {
+                noValidNameUser = false;
+            } else {
+                System.out.print("Sorry, you enter not valid name of user. Do you want to try again. (y/n): ");
+                if (scanner.nextLine().equals("n")) return null;
+            }
+        }
+        return inputReporterUser;
+    }
 
     private void showDashboard() {
         System.out.println("Dashboard .... ");

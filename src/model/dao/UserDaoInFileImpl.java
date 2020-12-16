@@ -7,14 +7,12 @@ import java.util.*;
 
 public class UserDaoInFileImpl implements UserDao {
     private final List<User> users = new ArrayList<>();
-    private final String nameFile;
-    private final String regex = ":";
+    private final String PATH = "src" + File.separator +
+            "resources" + File.separator + "userDB.txt";
+    private final String regexUserFields = ":";
 
     public UserDaoInFileImpl() throws FileNotFoundException {
-        nameFile = "src" + File.separator +
-                "resources" + File.separator +
-                "userDB.txt";
-        loadUsersFromFile(nameFile);
+        loadUsersFromFile(PATH);
     }
 
     @Override
@@ -25,7 +23,7 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public void deleteUser(User user) throws IOException {
-        updateUserFromFile(user,"");
+        updateUserFromFile(user, "");
         users.remove(user);
     }
 
@@ -36,9 +34,8 @@ public class UserDaoInFileImpl implements UserDao {
 
     @Override
     public User getUserByName(String userName) {
-        return users.stream()
-                .filter(user -> user.getUserName()
-                        .equals(userName)).findFirst().orElse(null);
+        return users.stream().filter(user -> user.getUserName()
+                .equals(userName)).findFirst().orElse(null);
     }
 
     @Override
@@ -48,22 +45,22 @@ public class UserDaoInFileImpl implements UserDao {
                 params[0], "Name cannot be null"));
         newUser.setPassword(Objects.requireNonNull(
                 params[1], "Password cannot be null"));
-        String stringNewUser = newUser.getUserName() + regex +
+        String stringNewUser = newUser.getUserName() + regexUserFields +
                 newUser.getPassword() + System.lineSeparator();
-        updateUserFromFile(user,stringNewUser);
-        users.set(users.indexOf(user),newUser);
+        updateUserFromFile(user, stringNewUser);
+        users.set(users.indexOf(user), newUser);
     }
 
     private void addUserFromLine(String line) {
-        String[] array = line.split(regex);
+        String[] array = line.split(regexUserFields);
         users.add(new User(array[0], array[1]));
     }
 
-    private void loadUsersFromFile(String nameFile) throws FileNotFoundException{
+    private void loadUsersFromFile(String nameFile) throws FileNotFoundException {
 
         try (
-             FileReader fileReader = new FileReader(nameFile);
-             BufferedReader reader = new BufferedReader(fileReader)
+                FileReader fileReader = new FileReader(nameFile);
+                BufferedReader reader = new BufferedReader(fileReader)
         ) {
             String currentLine;
             while ((currentLine = reader.readLine()) != null) {
@@ -77,16 +74,16 @@ public class UserDaoInFileImpl implements UserDao {
     }
 
     private void writeUserToFile(User user) throws IOException {
-        File file = new File(nameFile);
+        File file = new File(PATH);
         if (file.exists()) {
             try (
                     PrintWriter out = new PrintWriter(new FileWriter(file, true))
             ) {
-                out.println(user.getUserName() + regex + user.getPassword());
+                out.println(user.getUserName() + regexUserFields + user.getPassword());
             } catch (IOException e) {
                 throw e;
             }
-        }else{
+        } else {
             throw new IOException("File not found");
         }
     }
@@ -94,7 +91,7 @@ public class UserDaoInFileImpl implements UserDao {
     private void updateUserFromFile(User user, String update) throws IOException {
         Scanner sc;
         try {
-            sc = new Scanner(new File(nameFile));
+            sc = new Scanner(new File(PATH));
         } catch (FileNotFoundException e) {
             throw e;
         }
@@ -106,11 +103,11 @@ public class UserDaoInFileImpl implements UserDao {
         }
         fileContents = buffer.toString();
         sc.close();
-        fileContents = fileContents.replaceAll(user.getUserName() + regex +
+        fileContents = fileContents.replaceAll(user.getUserName() + regexUserFields +
                 user.getPassword() + System.lineSeparator(), update);
         FileWriter writer;
         try {
-            writer = new FileWriter(nameFile);
+            writer = new FileWriter(PATH);
             writer.append(fileContents);
             writer.flush();
         } catch (IOException e) {
