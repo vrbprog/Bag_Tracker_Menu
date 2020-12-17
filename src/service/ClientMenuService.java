@@ -1,4 +1,4 @@
-package controller;
+package service;
 
 import model.Priority;
 import model.Status;
@@ -6,41 +6,40 @@ import model.Ticket;
 import model.User;
 import model.dao.TicketDao;
 import model.dao.TicketDaoInMemImpl;
-import model.dao.UserDaoInFileImpl;
-import service.ClientTicketService;
-import service.ClientUserService;
-import service.TicketService;
-import service.UserService;
-import viewConsole.*;
 import model.dao.UserDao;
+import model.dao.UserDaoInFileImpl;
+import viewConsole.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Controller {
+public class ClientMenuService implements MenuService{
 
     private final BaseMenu loginMenu;
     private final BaseMenu userTopMenu;
     private final BaseMenu userEditSubMenu;
     private final BaseMenu userEditStatusSubMenu;
     private final BaseMenu userEditPrioritySubMenu;
-    private final Scanner scanner;
     private final UserService clientUserService;
     private final TicketService clientTicketService;
     private User currentUser;
+    private final Scanner scanner;
 
-    public Controller() throws FileNotFoundException {
-        UserDao userDao = new UserDaoInFileImpl();
-        //userDao = new UserDaoInMemImpl();
+    public ClientMenuService() {
+        UserDao userDao = null;
+        try {
+            userDao = new UserDaoInFileImpl();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("Error. The data file is not available, the application will be closed");
+            System.exit(0);
+        }
         TicketDao ticketDao = new TicketDaoInMemImpl();
-        clientUserService = new ClientUserService(userDao);
-        clientTicketService = new ClientTicketService(ticketDao);
         loginMenu = createMenu(LoginMenuItem.values(),
                 "Login menu", "0. Exit from program");
         userTopMenu = createMenu(UserTopMenuItem.values(),
@@ -51,22 +50,13 @@ public class Controller {
                 "Edit status menu", "0. Exit from edit menu");
         userEditPrioritySubMenu = createMenu(Priority.values(),
                 "Edit priority menu", "0. Exit from edit menu");
+        clientUserService = new ClientUserService(userDao);
+        clientTicketService = new ClientTicketService(ticketDao);
         scanner = new Scanner(System.in);
     }
 
-    public void run() {
-        while (true) {
-            while (getChoiceUserLoginMenu()) {
-                printInvalidMessage();
-                //System.out.println("********************");
-            }
-            while (getChoiceUserTopMenu()) {
-                System.out.println("********************");
-            }
-        }
-    }
-
-    private boolean getChoiceUserLoginMenu() {
+    @Override
+    public boolean runLoginMenu() {
         final int LOGIN = 1, REGISTRATION = 2, EXIT = 0;
         switch (loginMenu.show()) {
             case LOGIN: {
@@ -86,7 +76,8 @@ public class Controller {
         }
     }
 
-    private boolean getChoiceUserTopMenu() {
+    @Override
+    public boolean runTopMenu() {
         final int CREATE_TICKET = 1, EDIT_TICKET = 2, MY_TICKET_LIST = 3,
                 MY_DASHBOARD = 4, RETURN_IN_LOGIN_MENU = 5, EXIT = 0;
         switch (userTopMenu.show()) {
@@ -119,11 +110,11 @@ public class Controller {
         }
     }
 
-    private <T extends Enum<T>> BaseMenu createMenu(T[] aValues, String header, String bottom) {
+    private <T extends Enum<T>> BaseMenu createMenu(T[] values, String header, String bottom) {
         List<MenuItem> listLoginMenuItem = new ArrayList<>();
         listLoginMenuItem.add(new HeaderMenuItem(header));
         listLoginMenuItem.addAll(Arrays
-                .stream(aValues).map(loginItem ->
+                .stream(values).map(loginItem ->
                         new MenuItem(loginItem.toString()))
                 .collect(Collectors.toList()));
         listLoginMenuItem.add(new BottomMenuItem(bottom));
@@ -171,17 +162,11 @@ public class Controller {
         }
 
         currentUser = new User(login, password);
-        try {
-            if (clientUserService.userRegistration(currentUser)) {
-                printMessageMenu("Hello " + login + ". You are registered in system");
-                return false;
-            } else {
-                printMessageMenu("Registration failed!");
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            printMessageMenu("Error access to file DB");
+        if (clientUserService.userRegistration(currentUser)) {
+            printMessageMenu("Hello " + login + ". You are registered in system");
+            return false;
+        } else {
+            printMessageMenu("Registration failed!");
             return true;
         }
     }
@@ -253,28 +238,30 @@ public class Controller {
         printMessageMenu("You can edit fields: reporter, status, priority and estimated time");
         boolean isEditingTicket = true;
         while (isEditingTicket) {
+            final int REPORTER = 1, STATUS = 2, PRIORITY = 3,
+                    ESTIMATED_TIME = 4, EXIT = 0;
             switch (userEditSubMenu.show()) {
-                case 1: {
+                case REPORTER: {
                     System.out.println("Editing reporter ....");
                     editReporterSubMenu(editTicket);
                     break;
                 }
-                case 2: {
+                case STATUS: {
                     System.out.println("Editing status .... ");
                     showEditStatusMenu(editTicket);
                     break;
                 }
-                case 3: {
+                case PRIORITY: {
                     System.out.println("Editing priority ....");
                     showEditPriorityMenu(editTicket);
                     break;
                 }
-                case 4: {
+                case ESTIMATED_TIME: {
                     System.out.println("Editing estimated time ....");
                     showEditEstimatedTime(editTicket);
                     break;
                 }
-                case 0: {
+                case EXIT: {
                     isEditingTicket = false;
                     break;
                 }
@@ -290,33 +277,35 @@ public class Controller {
         boolean flag = true;
         Ticket updateTicket = new Ticket(editTic);
         while (flag) {
+            final int TO_DO = 1, IN_WORK = 2, REVIEW = 3,
+                    NEED_REFACTORING = 4, DONE = 5, EXIT = 0;
             switch (userEditStatusSubMenu.show()) {
-                case 1: {
+                case TO_DO: {
                     updateTicket.setStatus(Status.TO_DO);
                     flag = false;
                     break;
                 }
-                case 2: {
+                case IN_WORK: {
                     updateTicket.setStatus(Status.IN_WORK);
                     flag = false;
                     break;
                 }
-                case 3: {
+                case REVIEW: {
                     updateTicket.setStatus(Status.REVIEW);
                     flag = false;
                     break;
                 }
-                case 4: {
+                case NEED_REFACTORING: {
                     updateTicket.setStatus(Status.NEED_REFACTORING);
                     flag = false;
                     break;
                 }
-                case 5: {
+                case DONE: {
                     updateTicket.setStatus(Status.DONE);
                     flag = false;
                     break;
                 }
-                case 0: {
+                case EXIT: {
                     flag = false;
                     break;
                 }
@@ -340,28 +329,30 @@ public class Controller {
         boolean flag = true;
         Ticket updateTicket = new Ticket(editTic);
         while (flag) {
+            final int LOW = 1, MIDDLE = 2, HIGH = 3,
+                    EXTRA_HIGH = 4, EXIT = 0;
             switch (userEditPrioritySubMenu.show()) {
-                case 1: {
+                case LOW: {
                     updateTicket.setPriority(Priority.LOW);
                     flag = false;
                     break;
                 }
-                case 2: {
+                case MIDDLE: {
                     updateTicket.setPriority(Priority.MIDDLE);
                     flag = false;
                     break;
                 }
-                case 3: {
+                case HIGH: {
                     updateTicket.setPriority(Priority.HIGH);
                     flag = false;
                     break;
                 }
-                case 4: {
+                case EXTRA_HIGH: {
                     updateTicket.setPriority(Priority.EXTRA_HIGH);
                     flag = false;
                     break;
                 }
-                case 0: {
+                case EXIT: {
                     flag = false;
                     break;
                 }
@@ -443,15 +434,15 @@ public class Controller {
         System.out.println("Sorry, the service is still under development");
     }
 
+    private void printMessageMenu(String mes) {
+        System.out.println("--------------------");
+        System.out.println(mes);
+    }
+
     private void systemOut() {
         System.out.println("********************");
         System.out.println("You exit from program. Bye-Bye!");
         System.exit(0);
-    }
-
-    private void printMessageMenu(String mes) {
-        System.out.println("--------------------");
-        System.out.println(mes);
     }
 
     private void printInvalidMessage() {

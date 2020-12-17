@@ -20,9 +20,16 @@ public class ClientUserService implements UserService{
     }
 
     @Override
-    public boolean userRegistration(User user) throws IOException {
+    public boolean userRegistration(User user) {
         if(!loginIsBusy(user.getUserName())) {
-            userDao.saveUser(user);
+            try {
+                userDao.saveUser(user);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("********************");
+                System.out.println("Error access to file DB");
+                return false;
+            }
             return true;
         }
         return false;

@@ -16,7 +16,7 @@ public interface UserService {
 
     boolean loginIsBusy(String username);
 
-    boolean userRegistration(User user) throws IOException;
+    boolean userRegistration(User user);
 
 
 }
