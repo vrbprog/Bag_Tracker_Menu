@@ -3,11 +3,10 @@ package service;
 import model.Ticket;
 import model.User;
 import model.dao.TicketDao;
-import model.dao.UserDao;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 public class ClientTicketService implements TicketService {
@@ -20,22 +19,21 @@ public class ClientTicketService implements TicketService {
 
     @Override
     public boolean createTicket(Ticket ticket) {
-        return ticketDao.saveTicket(ticket);
+        try {
+            ticketDao.saveTicket(ticket);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error access to file DB");
+            return false;
+        }
     }
 
     @Override
-    public void showUserTicket(User user) {
-        List<Ticket> list;
-        list = ticketDao.getAll().stream()
+    public List<Ticket> getUserTickets(User user) {
+        return ticketDao.getAll().stream()
                 .filter(ticket -> ticket.getReporterName()
                         .equals(user.getUserName())).collect(Collectors.toList());
-        if (list.size() > 0) {
-            for (Ticket ticket : list) {
-                System.out.println(ticket);
-            }
-        } else {
-            System.out.println("You have no tickets for which you are reportable");
-        }
     }
 
     @Override

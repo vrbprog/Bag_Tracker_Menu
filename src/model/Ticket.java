@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Ticket {
 
@@ -98,5 +99,18 @@ public class Ticket {
                 "\n\r  status = " + status + " " +
                 "\n\r  priority = " + priority + " " +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ticket ticket = (Ticket) o;
+        return Objects.equals(ticketName, ticket.ticketName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ticketName);
     }
 }

@@ -4,14 +4,10 @@ import model.Priority;
 import model.Status;
 import model.Ticket;
 import model.User;
-import model.dao.TicketDao;
-import model.dao.TicketDaoInMemImpl;
-import model.dao.UserDao;
-import model.dao.UserDaoInFileImpl;
+import model.dao.*;
 import viewConsole.*;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,7 +35,8 @@ public class ClientMenuService implements MenuService{
             System.out.println("Error. The data file is not available, the application will be closed");
             System.exit(0);
         }
-        TicketDao ticketDao = new TicketDaoInMemImpl();
+        TicketDao ticketDao = new TicketDaoInFileImpl();
+        //TicketDao ticketDao = new TicketDaoInMemImpl();
         loginMenu = createMenu(LoginMenuItem.values(),
                 "Login menu", "0. Exit from program");
         userTopMenu = createMenu(UserTopMenuItem.values(),
@@ -180,10 +177,10 @@ public class ClientMenuService implements MenuService{
 
         String reporterUser = getReporterUser();
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         Date estDate = null;
         while (estDate == null) {
-            System.out.println("Enter estimated deadline date in the format yyyy-MM-dd");
+            System.out.println("Enter estimated deadline date in the format dd.MM.yyyy");
             System.out.println("For example, it is now " + format.format(new Date()));
             String line = scanner.nextLine();
             try {
@@ -208,7 +205,15 @@ public class ClientMenuService implements MenuService{
     }
 
     private void showUserTickets() {
-        clientTicketService.showUserTicket(currentUser);
+        List<Ticket> list = clientTicketService.getUserTickets(currentUser);
+        if (list.size() > 0) {
+            System.out.println(currentUser.getUserName() + " tickets:");
+            for (Ticket ticket : list) {
+                System.out.println(ticket);
+            }
+        } else {
+            System.out.println("You have no tickets for which you are reportable");
+        }
         printMessageMenu("For return in menu press Enter");
         scanner.nextLine();
     }
@@ -373,10 +378,10 @@ public class ClientMenuService implements MenuService{
     }
 
     private void showEditEstimatedTime(Ticket editTic) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         Date estDate = null;
         while (estDate == null) {
-            System.out.println("Enter new estimated deadline date in the format yyyy-MM-dd");
+            System.out.println("Enter new estimated deadline date in the format dd.MM.yyyy");
             System.out.println("For example, it is now " + format.format(new Date()));
             String line = scanner.nextLine();
             try {

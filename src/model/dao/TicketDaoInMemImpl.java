@@ -12,8 +12,8 @@ public class TicketDaoInMemImpl implements TicketDao{
     }
 
     @Override
-    public boolean saveTicket(Ticket ticket) {
-        return tickets.add(ticket);
+    public void saveTicket(Ticket ticket) {
+        tickets.add(ticket);
     }
 
     @Override

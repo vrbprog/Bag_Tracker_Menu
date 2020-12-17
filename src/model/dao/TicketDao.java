@@ -1,11 +1,13 @@
 package model.dao;
 
 import model.Ticket;
+
+import java.io.IOException;
 import java.util.List;
 
 public interface TicketDao {
 
-    boolean saveTicket(Ticket ticket);
+    void saveTicket(Ticket ticket) throws IOException;
 
     List<Ticket> getAll();
 
