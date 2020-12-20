@@ -13,28 +13,30 @@ public class BaseMenu implements Menu {
         scanner = new Scanner(System.in);
     }
 
-    public int show(){
+    public int show() {
         showHeaderMenu();
         showItems(menu);
         showBottomMenu();
         return getUserChoice();
     }
 
-    private void showHeaderMenu(){
+    private void showHeaderMenu() {
         System.out.println("********************");
-        System.out.println(menu.get(0).getNameItem());
+        System.out.println(menu.stream()
+                .filter(MenuItem::isHeaderItemMenu).findFirst().get().getNameItem());
     }
 
-    private void showBottomMenu(){
+    private void showBottomMenu() {
         System.out.println("--------------------");
-        System.out.println(menu.get(menu.size()-1).getNameItem());
+        System.out.println(menu.stream()
+                .filter(MenuItem::isBottomItemMenu).findFirst().get().getNameItem());
         System.out.println("********************");
     }
 
-    private int getUserChoice(){
+    private int getUserChoice() {
         System.out.print("Make your choice: ");
-        String choice =  scanner.nextLine();
-        if(isNumeric(choice)) return Integer.parseInt(choice);
+        String choice = scanner.nextLine();
+        if (isNumeric(choice)) return Integer.parseInt(choice);
         else return -1;
     }
 
