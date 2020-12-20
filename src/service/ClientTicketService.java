@@ -43,4 +43,25 @@ public class ClientTicketService implements TicketService {
                         .equals(nameTicket)).findFirst().orElse(null);
 
     }
+
+    @Override
+    public boolean isTicket(Ticket ticket) {
+        return ticketDao.getAll().contains(ticket);
+    }
+
+    @Override
+    public boolean updateTicket(Ticket oldTicket, Ticket newTicket) {
+        if(isTicket(oldTicket)){
+            try {
+                ticketDao.updateTicket(oldTicket, newTicket);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("********************");
+                System.out.println("Error access to file DB");
+                return false;
+            }
+        }
+        return false;
+    }
 }

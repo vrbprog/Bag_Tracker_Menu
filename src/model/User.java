@@ -1,14 +1,14 @@
 package model;
 
-public class User {
+import java.io.Serializable;
+import java.util.Objects;
+
+public class User implements Serializable {
     private String userName;
     private String password;
 
-    public User() {
-    }
-
-    public User(String login, String password) {
-        this.userName = login;
+    public User(String userName, String password) {
+        this.userName = userName;
         this.password = password;
     }
 
@@ -26,6 +26,19 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return userName.equals(user.userName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName);
     }
 
     @Override

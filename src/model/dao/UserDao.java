@@ -15,5 +15,5 @@ public interface UserDao {
 
     User getUserByName(String userName);
 
-    void updateUser(User user, String[] params) throws IOException;
+    void updateUser(User oldUser, User newUser) throws IOException;
 }

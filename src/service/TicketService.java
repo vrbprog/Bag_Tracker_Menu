@@ -14,4 +14,8 @@ public interface TicketService {
 
     Ticket getTicketByName(String nameTicket);
 
+    boolean isTicket(Ticket ticket);
+
+    boolean updateTicket(Ticket oldTicket, Ticket newTicket);
+
 }

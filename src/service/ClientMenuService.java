@@ -8,6 +8,7 @@ import model.dao.*;
 import viewConsole.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,14 +29,16 @@ public class ClientMenuService implements MenuService{
 
     public ClientMenuService() {
         UserDao userDao = null;
+        TicketDao ticketDao = null;
         try {
             userDao = new UserDaoInFileImpl();
+            ticketDao = new TicketDaoInFileImpl();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.out.println("Error. The data file is not available, the application will be closed");
             System.exit(0);
         }
-        TicketDao ticketDao = new TicketDaoInFileImpl();
+
         //TicketDao ticketDao = new TicketDaoInMemImpl();
         loginMenu = createMenu(LoginMenuItem.values(),
                 "Login menu", "0. Exit from program");
@@ -325,8 +328,11 @@ public class ClientMenuService implements MenuService{
         System.out.println("Edited " + updateTicket);
         System.out.print("Do you want to save changes. (y/n): ");
         if (scanner.nextLine().equals("y")) {
-            //Service updateTicket
-            System.out.println("Change in status has been saved");
+            if(clientTicketService.updateTicket(editTic,updateTicket)) {
+                System.out.println("Change in status has been saved");
+            }else{
+                System.out.println("Error. Editing ticket didn't saved.");
+            }
         }
     }
 
@@ -372,8 +378,11 @@ public class ClientMenuService implements MenuService{
         System.out.println("Edited " + updateTicket);
         System.out.print("Do you want to save changes. (y/n): ");
         if (scanner.nextLine().equals("y")) {
-            //Service updateTicket
-            System.out.println("Change in priority has been saved");
+            if(clientTicketService.updateTicket(editTic,updateTicket)) {
+                System.out.println("Change in priority has been saved");
+            }else{
+                System.out.println("Error. Editing ticket didn't saved.");
+            }
         }
     }
 
@@ -392,8 +401,11 @@ public class ClientMenuService implements MenuService{
                 System.out.println("Edited " + updateTicket);
                 System.out.print("Do you want to save changes. (y/n): ");
                 if (scanner.nextLine().equals("y")) {
-                    //Service updateTicket
-                    System.out.println("Change in estimated date has been saved");
+                    if(clientTicketService.updateTicket(editTic,updateTicket)) {
+                        System.out.println("Change in estimated date has been saved");
+                    }else{
+                        System.out.println("Error. Editing ticket didn't saved.");
+                    }
                 }
             } catch (ParseException e) {
                 System.out.print("Sorry, that's not valid. Do you want to try again. (y/n): ");
@@ -412,8 +424,11 @@ public class ClientMenuService implements MenuService{
             System.out.println("Edited " + updateTicket);
             System.out.print("Do you want to save changes. (y/n): ");
             if (scanner.nextLine().equals("y")) {
-                //Service updateTicket
-                System.out.println("Change in reporter of ticket has been saved");
+                if(clientTicketService.updateTicket(editTic,updateTicket)) {
+                    System.out.println("Changing in reporter of ticket has been saved");
+                }else{
+                    System.out.println("Error. Editing ticket didn't saved.");
+                }
             }
         }
     }

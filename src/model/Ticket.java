@@ -39,6 +39,24 @@ public class Ticket {
         this.priority = copy.getPriority();
     }
 
+    public Ticket(String ticketName,
+                  String description,
+                  String assignee,
+                  String reporter,
+                  Date spentTime,
+                  Date estimatedTime,
+                  Status status,
+                  Priority priority) {
+        this.ticketName = ticketName;
+        this.description = description;
+        this.assignee = assignee;
+        this.reporter = reporter;
+        this.spentTime = spentTime;
+        this.estimatedTime = estimatedTime;
+        this.status = status;
+        this.priority = priority;
+    }
+
     public String getTicketName() {
         return ticketName;
     }

@@ -39,16 +39,11 @@ public class UserDaoInFileImpl implements UserDao {
     }
 
     @Override
-    public void updateUser(User user, String[] params) throws IOException {
-        User newUser = new User();
-        newUser.setUserName(Objects.requireNonNull(
-                params[0], "Name cannot be null"));
-        newUser.setPassword(Objects.requireNonNull(
-                params[1], "Password cannot be null"));
+    public void updateUser(User oldUser, User newUser) throws IOException {
         String stringNewUser = newUser.getUserName() + regexUserFields +
                 newUser.getPassword() + System.lineSeparator();
-        updateUserFromFile(user, stringNewUser);
-        users.set(users.indexOf(user), newUser);
+        updateUserFromFile(oldUser, stringNewUser);
+        users.set(users.indexOf(oldUser), newUser);
     }
 
     private void addUserFromLine(String line) {

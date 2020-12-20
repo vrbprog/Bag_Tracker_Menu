@@ -20,4 +20,9 @@ public class TicketDaoInMemImpl implements TicketDao{
     public List<Ticket> getAll() {
         return tickets;
     }
+
+    @Override
+    public void updateTicket(Ticket oldTicket, Ticket newTicket) {
+        tickets.set(tickets.indexOf(oldTicket), newTicket);
+    }
 }
