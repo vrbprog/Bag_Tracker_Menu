@@ -21,7 +21,7 @@ public class BaseMenu implements Menu {
     }
 
     private void showHeaderMenu() {
-        System.out.println("********************");
+        System.out.println("\n\r****************************************");
         System.out.println(menu.stream()
                 .filter(MenuItem::isHeaderItemMenu).findFirst().get().getNameItem());
     }

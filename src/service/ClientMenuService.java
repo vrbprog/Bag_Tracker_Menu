@@ -71,6 +71,8 @@ public class ClientMenuService implements MenuService{
                 systemOut();
             }
             default: {
+                System.out.println("********************");
+                System.out.println("Incorrect data entry. Repeat again ");
                 return true;
             }
         }
@@ -105,6 +107,8 @@ public class ClientMenuService implements MenuService{
                 systemOut();
             }
             default: {
+                System.out.println("********************");
+                System.out.println("Incorrect data entry. Repeat again ");
                 return true;
             }
         }

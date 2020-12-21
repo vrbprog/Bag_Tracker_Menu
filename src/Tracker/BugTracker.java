@@ -13,11 +13,8 @@ public class BugTracker {
     public void run() {
         while (true) {
             while (clientMenuService.runLoginMenu()) {
-                System.out.println("********************");
-                System.out.println("Incorrect data entry. Repeat again ");
             }
             while (clientMenuService.runTopMenu()) {
-                System.out.println("********************");
             }
         }
     }
